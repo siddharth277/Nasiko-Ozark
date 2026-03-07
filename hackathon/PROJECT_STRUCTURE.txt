@@ -1,0 +1,204 @@
+hackathon/ (Unified HR AI Agent with Google Calendar Integration)
+│
+├── 📄 README.md                          # Complete setup & usage guide
+├── 📄 QUICKSTART.md                      # 5-minute quick start
+├── 📄 INTEGRATION_SUMMARY.md             # Technical integration details
+├── 📄 .env.example                       # Environment configuration template
+├── 📄 .env                               # Your environment configuration (create from .env.example)
+├── 📄 credentials.json                   # Google OAuth credentials (download from Google Cloud)
+├── 📄 token.json                         # Auto-generated OAuth token (created on first run)
+├── 📄 requirements.txt                   # Python dependencies (merged)
+├── 📄 main.py                            # FastAPI server
+├── 📄 setup.ps1                          # Windows setup script
+├── 📄 test_integration.py                # Integration test suite
+│
+├── 📁 agents/                            # AI Agent Modules
+│   ├── __init__.py
+│   ├── calendar_agent.py                 # ✨ NEW: Google Calendar integration
+│   ├── email_agent.py                    # Email drafting & sending
+│   ├── helpdesk_agent.py                 # Knowledge base Q&A
+│   ├── interview_agent.py                # Interview question generation
+│   ├── jd_agent.py                       # Job description generation
+│   ├── onboarding_agent.py               # Onboarding automation
+│   ├── posting_agent.py                  # Job posting (Telegram, etc.)
+│   └── screening_agent.py                # Resume screening with ML
+│
+├── 📁 calendar_service/                  # ✨ NEW: Calendar Service Module
+│   ├── __init__.py                       # Module exports
+│   ├── auth.py                           # Google OAuth authentication
+│   ├── calendar_tools.py                 # 10 calendar tools (LangChain compatible)
+│   ├── smart_scheduler.py                # Intelligent slot finding
+│   │                                     #  - Weekend detection
+│   │                                     #  - Holiday awareness (2025-2026)
+│   │                                     #  - Conflict avoidance
+│   │                                     #  - Timezone support (40+ cities)
+│   ├── reminder_service.py               # Day-of email reminders
+│   ├── graph.py                          # Optional LangGraph agent
+│   └── diagnose.py                       # Setup diagnostic tool
+│
+├── 📁 data/                              # Data Files
+│   ├── company_faq.txt                   # Helpdesk knowledge base
+│   ├── onboarding_docs/                  # Onboarding materials
+│   │   ├── company_handbook.txt
+│   │   └── *.pdf (offer letters)
+│   └── resumes/                          # Candidate resumes
+│       └── *.pdf (resume files)
+│
+├── 📁 static/                            # Frontend Files
+│   ├── index.html                        # Dashboard UI
+│   ├── app.js                            # Frontend logic
+│   └── style.css                         # Styling
+│
+└── 📁 utils/                             # Utility Modules
+    ├── __init__.py
+    ├── bert_utils.py                     # ML utilities
+    └── pdf_utils.py                      # PDF processing
+
+
+KEY FEATURES
+═══════════════════════════════════════════════════════════════
+
+✅ Real Google Calendar Integration
+   - Sync with your actual Google Calendar
+   - Persistent event storage
+   - Email invitations to candidates and HR
+
+✅ Smart Interview Scheduling
+   - Auto-finds available slots
+   - Skips weekends and holidays
+   - Avoids scheduling conflicts
+   - Timezone intelligent (40+ cities)
+
+✅ Automated Email Reminders
+   - Day-of reminders via Gmail API
+   - Beautiful HTML email templates
+   - Sent to both HR and candidates
+
+✅ Complete CRUD Operations
+   - Create, read, update, delete events
+   - Search and filter calendar events
+   - List multiple calendars
+
+✅ Production Ready
+   - OAuth token auto-refresh
+   - Error handling and diagnostics
+   - Comprehensive documentation
+
+
+API ENDPOINTS
+═══════════════════════════════════════════════════════════════
+
+Calendar:
+  GET    /api/calendar/events              # List all events
+  GET    /api/calendar/events/{year}/{month} # Events by month
+  POST   /api/calendar/events              # Create event
+  DELETE /api/calendar/events/{event_id}   # Delete event
+
+Job Description:
+  GET    /api/jd-styles                    # Available JD styles
+  POST   /api/jd/generate                  # Generate JD
+
+Job Posting:
+  POST   /api/posting/post                 # Post job
+  GET    /api/posting/status/{job_id}      # Job status
+  GET    /api/posting/jobs                 # All jobs
+
+Resume Screening:
+  POST   /api/screening/upload             # Upload resume
+  POST   /api/screening/screen             # Screen resumes
+  POST   /api/screening/shortlist          # Shortlist candidates
+
+Email:
+  POST   /api/email/draft                  # Draft emails
+  POST   /api/email/send                   # Send emails
+
+Helpdesk:
+  POST   /api/helpdesk/query               # Ask question
+  GET    /api/helpdesk/load                # Load knowledge base
+
+Onboarding:
+  POST   /api/onboarding/send              # Send welcome package
+
+Interview:
+  POST   /api/interview/questions          # Generate questions
+
+
+SETUP CHECKLIST
+═══════════════════════════════════════════════════════════════
+
+□ Install Python dependencies
+  → pip install -r requirements.txt
+
+□ Setup Google Calendar API
+  → Enable API in Google Cloud Console
+  → Create OAuth 2.0 credentials (Desktop app)
+  → Download credentials.json
+
+□ Configure environment variables
+  → Copy .env.example to .env
+  → Add GROQ_API_KEY
+  → Add OPENAI_API_KEY (for calendar agent)
+  → Add HR_EMAIL (your Gmail)
+
+□ Run diagnostics
+  → python -m calendar_service.diagnose
+
+□ Start the server
+  → python main.py
+  → Browser opens for Google login (first time only)
+
+□ Test the integration
+  → python test_integration.py
+  → Open http://localhost:8000
+
+
+WHAT'S DIFFERENT FROM MOCK CALENDAR
+═══════════════════════════════════════════════════════════════
+
+Before (Mock):                  After (Real Calendar):
+─────────────────────────────────────────────────────────────
+In-memory storage              → Google Calendar sync
+Lost on restart                → Persistent storage
+Simple CRUD                    → Smart scheduling
+No external integration        → Email invites & reminders
+No timezone support            → Multi-timezone aware
+Manual conflict detection      → Automatic conflict avoidance
+No holiday awareness           → Indian holidays built-in
+Fixed time slots               → Dynamic slot finding
+
+
+DEPENDENCIES ADDED
+═══════════════════════════════════════════════════════════════
+
+openai>=1.30.0                 # OpenAI API (calendar agent)
+langchain>=0.3.0               # LangChain framework
+langchain-openai>=0.1.0        # OpenAI integration
+langchain-core>=0.3.0          # Core LangChain
+langgraph>=0.2.0               # Graph agents
+google-auth-httplib2>=0.1.0    # Google HTTP auth
+python-dateutil>=2.8.0         # Date utilities
+rich>=13.0.0                   # Terminal formatting
+
+
+QUICK COMMANDS
+═══════════════════════════════════════════════════════════════
+
+Start server:        python main.py
+Run diagnostics:     python -m calendar_service.diagnose
+Test integration:    python test_integration.py
+Install deps:        pip install -r requirements.txt
+Update .env:         nano .env (or any text editor)
+
+
+DOCUMENTATION
+═══════════════════════════════════════════════════════════════
+
+README.md                 # Complete guide (start here!)
+QUICKSTART.md             # 5-minute setup guide
+INTEGRATION_SUMMARY.md    # Technical details
+.env.example              # Configuration template
+
+
+Need help? Run the diagnostic tool:
+  → python -m calendar_service.diagnose
+

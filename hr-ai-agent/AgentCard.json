@@ -1,0 +1,56 @@
+{
+    "protocolVersion": "0.2.9",
+    "name": "HR AI Agent",
+    "description": "An intelligent HR hiring platform agent that handles the full recruitment lifecycle — from generating job descriptions and screening resumes, to drafting interview questions, creating offer letters, building company handbooks, and answering HR policy queries.",
+    "url": "http://localhost:5000/",
+    "preferredTransport": "JSONRPC",
+    "provider": {
+        "organization": "Hackathon Team",
+        "url": "https://github.com/hackathon99/hr-ai-agent"
+    },
+    "iconUrl": "http://localhost:5000/icon.png",
+    "version": "1.0.0",
+    "documentationUrl": "http://localhost:5000/docs",
+    "capabilities": {
+        "streaming": false,
+        "pushNotifications": false,
+        "stateTransitionHistory": true,
+        "chat_agent": true
+    },
+    "securitySchemes": {},
+    "security": [],
+    "defaultInputModes": ["text/plain"],
+    "defaultOutputModes": ["text/plain"],
+    "skills": [
+        {
+            "name": "generate_job_description",
+            "description": "Generate compelling, professional Job Descriptions in various styles (Corporate, Startup, Technical, Creative, Executive)"
+        },
+        {
+            "name": "screen_resume",
+            "description": "Evaluate and score a candidate's resume against a job description with structured assessment"
+        },
+        {
+            "name": "generate_interview_questions",
+            "description": "Generate 10 tailored interview questions with rationales and expected answers"
+        },
+        {
+            "name": "generate_offer_letter",
+            "description": "Create FAANG-grade professional offer letters with compensation details"
+        },
+        {
+            "name": "generate_company_handbook",
+            "description": "Draft comprehensive company handbooks covering values, culture, and benefits"
+        },
+        {
+            "name": "answer_hr_query",
+            "description": "Answer employee HR policy questions about PTO, benefits, remote work, etc."
+        },
+        {
+            "name": "draft_interview_email",
+            "description": "Draft professional interview invitation emails for candidates"
+        }
+    ],
+    "supportsAuthenticatedExtendedCard": false,
+    "signatures": []
+}

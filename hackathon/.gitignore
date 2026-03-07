@@ -1,0 +1,6 @@
+.env
+.env_prev
+credentials.json
+token.json
+__pycache__/
+*.pyc

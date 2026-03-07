@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR AI Agent — Dashboard</title>
+  <meta name="description"
+    content="AI-powered HR automation platform for JD generation, resume screening, and candidate management" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h1>⚡ HR AI Agent</h1>
+      <p>Intelligent Hiring Platform</p>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Recruitment</div>
+      <div class="nav-item active" data-page="jd" onclick="showPage('jd',this)">
+        <span class="icon">🧠</span> JD Generator
+      </div>
+      <div class="nav-item" data-page="status" onclick="showPage('status',this)">
+        <span class="icon">📊</span> Job Status
+        <span class="nav-badge" id="badge-status">0</span>
+      </div>
+      <div class="nav-item" data-page="resumes" onclick="showPage('resumes',this)">
+        <span class="icon">📄</span> Resume Screening
+        <span class="nav-badge" id="badge-resumes">0</span>
+      </div>
+      <div class="nav-section-label">Communication</div>
+      <div class="nav-item" data-page="emails" onclick="showPage('emails',this)">
+        <span class="icon">✉️</span> Email Center
+        <span class="nav-badge" id="badge-emails">0</span>
+      </div>
+      <div class="nav-item" data-page="calendar" onclick="showPage('calendar',this)">
+        <span class="icon">📅</span> Calendar
+      </div>
+      <div class="nav-item" data-page="helpdesk" onclick="showPage('helpdesk',this)">
+        <span class="icon">🤖</span> HR Helpdesk
+      </div>
+      <div class="nav-section-label">Onboarding</div>
+      <div class="nav-item" data-page="documents" onclick="showPage('documents',this)">
+        <span class="icon">📝</span> Document Generator
+      </div>
+      <div class="nav-item" data-page="onboarding" onclick="showPage('onboarding',this)">
+        <span class="icon">🎉</span> Onboarding
+      </div>
+      <div class="nav-section-label">Metrics</div>
+      <div class="nav-item" data-page="analytics" onclick="showPage('analytics',this)">
+        <span class="icon">📈</span> Analytics
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <span class="status-dot"></span>Server Online
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">JD Generator</div>
+        <div class="topbar-sub" id="topbar-sub">Create and post job descriptions via AI</div>
+      </div>
+      <div class="session-pills">
+        <div class="pill">Role: <span id="pill-role">—</span></div>
+        <div class="pill">Resumes: <span id="pill-resumes">0</span></div>
+        <div class="pill">Shortlisted: <span id="pill-shortlisted">0</span></div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- ═══ PAGE: JD GENERATOR ═══ -->
+      <div id="page-jd" class="page">
+        <div class="card" id="jd-wizard-card">
+          <div class="card-header" style="margin-bottom: 12px;">
+            <div class="card-title">🧠 Generate Job Description</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);" id="jd-wizard-counter">Step 1 of 5</div>
+          </div>
+
+          <!-- Wizard Progress Bar -->
+          <div
+            style="height: 6px; background: var(--surface2); border-radius: 4px; overflow: hidden; margin-bottom: 24px;">
+            <div id="jd-wizard-progress"
+              style="height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; width: 20%; transition: width 0.3s ease;">
+            </div>
+          </div>
+
+          <!-- STEP 1: Role Basics -->
+          <div id="jd-step-1" class="jd-wizard-step">
+            <h3 style="font-size: 1.05rem; margin-bottom: 16px;">1. Role Basics</h3>
+            <div class="form-group">
+              <label class="form-label">Job Title</label>
+              <input type="text" id="jd-w-title" placeholder="e.g. Senior Machine Learning Engineer" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Department</label>
+              <input type="text" id="jd-w-dept" placeholder="e.g. Engineering / NLP Team" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Experience Level</label>
+              <div class="style-chips" id="jd-w-exp-chips">
+                <button class="style-chip" onclick="selectChipSingle(this, 'jd-w-exp-chips')">Intern</button>
+                <button class="style-chip" onclick="selectChipSingle(this, 'jd-w-exp-chips')">Junior</button>
+                <button class="style-chip" onclick="selectChipSingle(this, 'jd-w-exp-chips')">Mid</button>
+                <button class="style-chip active" onclick="selectChipSingle(this, 'jd-w-exp-chips')">Senior</button>
+                <button class="style-chip" onclick="selectChipSingle(this, 'jd-w-exp-chips')">Lead</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Skill Preferences -->
+          <div id="jd-step-2" class="jd-wizard-step" style="display: none;">
+            <h3 style="font-size: 1.05rem; margin-bottom: 16px;">2. Skill Preferences</h3>
+            <div class="form-group">
+              <label class="form-label">Most preferred skills (e.g., PyTorch, Kubernetes)</label>
+              <textarea id="jd-w-skills-pref" rows="2" placeholder="List the core skills..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Minimum required vs nice-to-have (label them)</label>
+              <textarea id="jd-w-skills-req" rows="2"
+                placeholder="Required: Python, SQL. Nice-to-have: React, AWS..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Skills to explicitly exclude</label>
+              <input type="text" id="jd-w-skills-exclude" placeholder="e.g. PHP, Ruby (we don't use these)" />
+            </div>
+          </div>
+
+          <!-- STEP 3: Candidate Preferences -->
+          <div id="jd-step-3" class="jd-wizard-step" style="display: none;">
+            <h3 style="font-size: 1.05rem; margin-bottom: 16px;">3. Candidate Preferences</h3>
+            <div class="form-group">
+              <label class="form-label">Candidate Type (Multi-select)</label>
+              <div class="style-chips" id="jd-w-type-chips">
+                <button class="style-chip" onclick="toggleChipMulti(this)">Fresher</button>
+                <button class="style-chip" onclick="toggleChipMulti(this)">Intern</button>
+                <button class="style-chip active" onclick="toggleChipMulti(this)">Experienced</button>
+                <button class="style-chip" onclick="toggleChipMulti(this)">Research Background</button>
+                <button class="style-chip" onclick="toggleChipMulti(this)">Startup Experience</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Work Mode (Multi-select)</label>
+              <div class="style-chips" id="jd-w-work-chips">
+                <button class="style-chip active" onclick="toggleChipMulti(this)">Remote</button>
+                <button class="style-chip active" onclick="toggleChipMulti(this)">Hybrid</button>
+                <button class="style-chip" onclick="toggleChipMulti(this)">On-site</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notice Period (Multi-select)</label>
+              <div class="style-chips" id="jd-w-notice-chips">
+                <button class="style-chip" onclick="toggleChipMulti(this)">Immediate</button>
+                <button class="style-chip" onclick="toggleChipMulti(this)">15 days</button>
+                <button class="style-chip active" onclick="toggleChipMulti(this)">30 days</button>
+                <button class="style-chip" onclick="toggleChipMulti(this)">60 days</button>
+                <button class="style-chip" onclick="toggleChipMulti(this)">Flexible</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: Project & Domain Preferences -->
+          <div id="jd-step-4" class="jd-wizard-step" style="display: none;">
+            <h3 style="font-size: 1.05rem; margin-bottom: 16px;">4. Project & Domain Preferences</h3>
+            <div class="form-group">
+              <label class="form-label">Most preferred project types</label>
+              <textarea id="jd-w-projects" rows="2"
+                placeholder="e.g. NLP pipelines, fintech APIs, scalable microservices..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Domain experience preferred</label>
+              <input type="text" id="jd-w-domain" placeholder="e.g. Healthcare, SaaS, E-commerce..." />
+            </div>
+          </div>
+
+          <!-- STEP 5: JD Style -->
+          <div id="jd-step-5" class="jd-wizard-step" style="display: none;">
+            <h3 style="font-size: 1.05rem; margin-bottom: 16px;">5. Tone & Style</h3>
+            <div class="form-group">
+              <label class="form-label">JD Style (Single-select)</label>
+              <div class="style-chips" id="jd-w-style-chips">
+                <button class="style-chip active" data-val="Standard Corporate"
+                  onclick="selectChipSingle(this, 'jd-w-style-chips')">🏢 Standard Corporate</button>
+                <button class="style-chip" data-val="Startup Casual"
+                  onclick="selectChipSingle(this, 'jd-w-style-chips')">🚀 Startup Casual</button>
+                <button class="style-chip" data-val="Technical Deep-Dive"
+                  onclick="selectChipSingle(this, 'jd-w-style-chips')">⚙️ Technical Deep-Dive</button>
+                <button class="style-chip" data-val="Culture-First"
+                  onclick="selectChipSingle(this, 'jd-w-style-chips')">🌈 Culture-First</button>
+                <button class="style-chip" data-val="Executive" onclick="selectChipSingle(this, 'jd-w-style-chips')">👔
+                  Executive</button>
+              </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div id="jd-w-summary"
+              style="margin-top: 24px; padding: 16px; background: rgba(99, 102, 241, 0.05); border: 1px solid var(--accent-glow); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-dim);">
+              <div style="font-weight: 600; color: var(--text); margin-bottom: 8px;">📋 Summary of Preferences</div>
+              <div id="jd-summary-content">...</div>
+            </div>
+          </div>
+
+          <!-- Wizard Actions -->
+          <div
+            style="display: flex; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
+            <button class="btn btn-outline" id="jd-btn-back" onclick="navWizard(-1)" style="visibility: hidden;">◀
+              Back</button>
+            <button class="btn btn-primary" id="jd-btn-next" onclick="navWizard(1)">Next ▶</button>
+            <button class="btn btn-success" id="jd-btn-generate" onclick="generateWizardJD()" style="display: none;">✨
+              Generate JD</button>
+          </div>
+        </div>
+
+        <div class="card" id="jd-preview-card" style="display:none">
+          <div class="card-header">
+            <div class="card-title">📋 Generated Job Description</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-outline btn-sm" onclick="regenerateJD()">🔄 Regenerate</button>
+              <button class="btn btn-outline btn-sm" onclick="editJD()">✏️ Edit</button>
+              <button class="btn btn-success" id="btn-approve-jd" onclick="approveJD()">
+                ✅ Approve & Send via Telegram
+              </button>
+            </div>
+          </div>
+          <!-- Telegram Chat ID input for DM -->
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Telegram Chat ID <small style="color:var(--text-muted)">(your personal chat with
+                the bot — get it from @userinfobot)</small></label>
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <input type="text" id="telegram-chat-id" placeholder="e.g. 123456789" style="max-width:260px" />
+              <button class="btn btn-outline btn-sm" id="btn-test-tg" onclick="testTelegram()">📡 Test</button>
+            </div>
+            <div id="alert-telegram" class="alert" style="margin-top:8px"></div>
+          </div>
+          <div id="jd-output" class="jd-preview visible"></div>
+          <div id="jd-editable" style="display:none">
+            <textarea id="jd-edit-area" rows="20"
+              style="margin-top:12px;font-family:monospace;font-size:0.82rem"></textarea>
+            <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="saveJDEdit()">💾 Save Edit</button>
+          </div>
+          <div id="alert-posted" class="alert alert-success" style="margin-top:16px">
+            🚀 JD sent via Telegram DM successfully! Auto-relaxation scheduler activated.
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: JOB STATUS ═══ -->
+      <div id="page-status" class="page" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 Job Posting Status</div>
+            <button class="btn btn-outline btn-sm" onclick="loadJobStatus()">🔄 Refresh</button>
+          </div>
+          <div class="stat-grid" id="stat-grid">
+            <div class="stat-card">
+              <div class="stat-num" id="stat-version">—</div>
+              <div class="stat-label">JD Version</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num" id="stat-apps">—</div>
+              <div class="stat-label">Applications</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num" id="stat-threshold">—</div>
+              <div class="stat-label">Threshold</div>
+            </div>
+          </div>
+          <div class="card-title" style="margin-bottom:14px">📜 Timeline</div>
+          <div class="timeline" id="job-timeline">
+            <div style="color:var(--text-muted);font-size:0.85rem">No active job posted yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: RESUME SCREENING ═══ -->
+      <div id="page-resumes" class="page" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📄 Upload Resumes</div>
+          </div>
+          <div class="upload-zone" id="upload-zone" ondragover="event.preventDefault();this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
+            <input type="file" id="resume-files" multiple accept=".pdf,.txt" onchange="handleFileSelect(event)" />
+            <div class="upload-icon">📂</div>
+            <div class="upload-text">Drop resumes here or click to browse</div>
+            <div class="upload-sub">Multiple files • PDF and TXT supported</div>
+          </div>
+          <div class="file-list" id="file-list"></div>
+          <button class="btn btn-primary" style="margin-top:16px" id="btn-upload" onclick="uploadResumes()" disabled>
+            ⬆️ Upload Resumes
+          </button>
+        </div>
+
+        <div class="card" id="screening-card" style="display:none">
+          <div class="card-header">
+            <div class="card-title">🔍 BERT Resume Screening</div>
+            <button class="btn btn-primary" id="btn-screen" onclick="screenResumes()">
+              🧬 Screen All Resumes
+            </button>
+          </div>
+          <!-- Progress bar -->
+          <div id="screening-progress" style="display:none;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:0.82rem;color:var(--text-dim)" id="progress-label">Screening...</span>
+              <span style="font-size:0.82rem;color:var(--accent2)" id="progress-count">0/0</span>
+            </div>
+            <div style="height:6px;background:var(--surface2);border-radius:4px;overflow:hidden">
+              <div id="progress-bar"
+                style="height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;width:0%;transition:width 0.5s ease">
+              </div>
+            </div>
+          </div>
+          <div id="alert-screen" class="alert"></div>
+          <div class="candidates-grid" id="candidates-list"></div>
+          <div id="shortlist-actions" style="display:none;margin-top:16px">
+            <div class="divider"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="card-title">Selected: <span id="selected-count" style="color:var(--accent2)">0</span></div>
+              <div style="display: flex; gap: 12px">
+                <button class="btn btn-outline" onclick="sendRejections()">📨 Send Rejections</button>
+                <button class="btn btn-outline" style="border-color:var(--accent);color:var(--accent)"
+                  id="btn-auto-schedule-screener" onclick="autoScheduleInterviews()">🤖 Auto-Schedule All</button>
+                <button class="btn btn-success" onclick="confirmShortlist()">✅ Confirm Shortlist</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERVIEW QUESTIONS MODAL -->
+      <div id="interview-modal" class="modal-overlay" style="display:none">
+        <div class="modal">
+          <div class="modal-header">
+            <h3>🎯 AI Interview Questions</h3>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline" id="btn-export-pdf" onclick="exportInterviewPDF()"
+                style="display:none; border-color:var(--accent); color:var(--accent)">📄 Export PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="closeInterviewModal()">✕</button>
+            </div>
+          </div>
+          <div class="modal-body">
+            <div id="interview-questions-content"
+              style="font-size: 0.95rem; line-height: 1.5; color: var(--text-color);">
+              <!-- Questions generated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: EMAIL CENTER ═══ -->
+      <div id="page-emails" class="page" style="display:none">
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">✉️ Draft Interview Emails</div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label class="form-label">Interview Date & Time</label>
+              <input type="datetime-local" id="interview-time" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Meeting Link (optional)</label>
+              <input type="text" id="meeting-link" placeholder="https://meet.google.com/..." />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="btn-draft" onclick="draftEmails()">
+            🤖 Draft Emails with AI
+          </button>
+        </div>
+
+        <div class="card" id="drafts-card" style="display:none">
+          <div class="card-header">
+            <div class="card-title">📬 Draft Preview</div>
+            <button class="btn btn-success" id="btn-send" onclick="sendEmails()">
+              🚀 Confirm & Send All
+            </button>
+          </div>
+          <div id="alert-send" class="alert"></div>
+          <div id="email-drafts-list"></div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: CALENDAR ═══ -->
+      <div id="page-calendar" class="page" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📅 Interview Calendar</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn btn-outline btn-sm" onclick="calNav(-1)">◀ Prev</button>
+              <span id="cal-month-label" style="font-weight:600;min-width:140px;text-align:center"></span>
+              <button class="btn btn-outline btn-sm" onclick="calNav(1)">Next ▶</button>
+              <button class="btn btn-outline btn-sm" style="border-color:var(--accent);color:var(--accent)"
+                id="btn-auto-schedule-calendar" onclick="autoScheduleInterviews()">🤖 Auto-Schedule Shortlisted</button>
+              <button class="btn btn-primary btn-sm" onclick="openEventModal()">+ Add Event</button>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--warning);margin-bottom:12px">⚠️ Demo mode — events stored in memory.
+            Connect Google Calendar API credentials in settings to sync.</div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">📋 Upcoming Events</div>
+          <div id="cal-event-list" style="font-size:0.85rem;color:var(--text-muted)">No events scheduled yet.</div>
+        </div>
+        <!-- Event Modal -->
+        <div id="event-modal" class="modal-overlay" style="display:none"
+          onclick="if(event.target===this)closeEventModal()">
+          <div class="modal-card">
+            <div class="card-title" style="margin-bottom:16px">📅 Add Event</div>
+            <div class="form-group"><label class="form-label">Title</label><input type="text" id="ev-title"
+                placeholder="Interview with..." /></div>
+            <div class="row">
+              <div class="form-group"><label class="form-label">Date & Time</label><input type="datetime-local"
+                  id="ev-datetime" /></div>
+              <div class="form-group"><label class="form-label">Type</label>
+                <select id="ev-type">
+                  <option value="interview">🔵 Interview</option>
+                  <option value="followup">🟡 Follow-up</option>
+                  <option value="offer">🟢 Offer</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group"><label class="form-label">Candidate Name</label><input type="text" id="ev-candidate"
+                placeholder="Optional" /></div>
+            <div class="form-group"><label class="form-label">Notes</label><textarea id="ev-notes" rows="2"
+                placeholder="Optional notes..."></textarea></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+              <button class="btn btn-outline btn-sm" onclick="closeEventModal()">Cancel</button>
+              <button class="btn btn-primary" onclick="submitEvent()">✅ Save Event</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: HELPDESK ═══ -->
+      <div id="page-helpdesk" class="page" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🤖 HR Helpdesk — BERT RAG Chatbot</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">Powered by BERT + Groq Llama 3.3</div>
+          </div>
+          <div class="chat-window" id="chat-window">
+            <div class="chat-bubble bot">
+              👋 Hi! I'm your HR assistant. Ask me anything about the company — benefits, leave policy, interview
+              process, work from home policy, or any other HR-related question. I'll give you accurate answers based on
+              our company policies.
+            </div>
+          </div>
+          <div class="chat-quick-replies"
+            style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; padding:0 8px;">
+            <button class="style-chip" onclick="quickReplyHelpdesk('What is our Work From Home policy?')">🏠 WFH
+              Policy</button>
+            <button class="style-chip" onclick="quickReplyHelpdesk('How do I request PTO?')">🌴 Request PTO</button>
+            <button class="style-chip" onclick="quickReplyHelpdesk('What are the standard health benefits?')">🏥 Health
+              Benefits</button>
+            <button class="style-chip"
+              onclick="quickReplyHelpdesk('What is the interview process for engineering roles?')">💻 Interview
+              Process</button>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" id="helpdesk-input"
+              placeholder="Ask about work from home policy, salary, interview process…"
+              onkeydown="if(event.key==='Enter') sendHelpdeskQuery()" />
+            <button class="btn btn-primary" onclick="sendHelpdeskQuery()">Send ➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: DOCUMENT GENERATOR ═══ -->
+      <div id="page-documents" class="page" style="display:none;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <!-- Offer Letter Form -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📜 Generate Offer Letter</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Candidate Name</label>
+              <input type="text" id="doc-ol-name" placeholder="John Doe" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <input type="text" id="doc-ol-role" placeholder="Senior Software Engineer" />
+            </div>
+            <div style="display:flex;gap:12px">
+              <div class="form-group" style="flex:1">
+                <label class="form-label">Base Salary</label>
+                <input type="text" id="doc-ol-salary" placeholder="$150,000" />
+              </div>
+              <div class="form-group" style="flex:1">
+                <label class="form-label">Equity/Bonus</label>
+                <input type="text" id="doc-ol-equity" placeholder="10,000 RSUs" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input type="date" id="doc-ol-startdate" />
+            </div>
+            <button class="btn btn-primary" style="width:100%" id="btn-gen-offer" onclick="generateOfferLetter()">🪄
+              Generate Offer Letter</button>
+          </div>
+
+          <!-- Company Handbook Form -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📘 Generate Company Handbook</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Company Name</label>
+              <input type="text" id="doc-hb-company" placeholder="Acme Corp" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Core Values</label>
+              <textarea id="doc-hb-values" rows="2" placeholder="Innovation, Empathy, Impact..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Perks & Benefits</label>
+              <textarea id="doc-hb-perks" rows="2" placeholder="Remote first, Unlimited PTO, 401k match..."></textarea>
+            </div>
+            <button class="btn btn-primary" style="width:100%" id="btn-gen-handbook" onclick="generateHandbook()">🪄
+              Generate Handbook</button>
+          </div>
+        </div>
+
+        <!-- Document Preview -->
+        <div class="card" style="margin-top:24px; display:none;" id="doc-preview-card">
+          <div class="card-header">
+            <div class="card-title">👁 Document Preview</div>
+            <button class="btn btn-outline" style="border-color:var(--accent);color:var(--accent)"
+              onclick="exportDocumentPDF()">📄 Export PDF</button>
+          </div>
+          <div id="doc-preview-content"
+            style="padding:24px; background:white; color:black; border:1px solid #ccc; border-radius:8px; min-height:400px; max-height:600px; overflow-y:auto; margin-top:16px;">
+            <!-- Rendered HTML goes here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: ONBOARDING ═══ -->
+      <div id="page-onboarding" class="page" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🎉 Send Welcome Package</div>
+          </div>
+          <div id="onboarding-candidate-list" style="margin-bottom:16px"></div>
+          <div class="form-group">
+            <label class="form-label">Or enter candidate email manually</label>
+            <input type="text" id="onboard-email" placeholder="candidate@example.com" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role Offered</label>
+            <input type="text" id="onboard-role" placeholder="e.g. Senior ML Engineer" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Salary Offered</label>
+            <input type="text" id="onboard-salary" placeholder="e.g. $120,000" />
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">An official PDF Offer Letter will
+              be generated automatically and attached to the welcome email.</div>
+          </div>
+          <button class="btn btn-success" id="btn-onboard" onclick="sendOnboarding()">
+            🎁 Send Welcome Package
+          </button>
+          <div id="alert-onboard" class="alert" style="margin-top:16px"></div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: ANALYTICS ═══ -->
+      <div id="page-analytics" class="page" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📈 Recruitment Analytics</div>
+            <button class="btn btn-outline btn-sm" onclick="loadAnalytics()">🔄 Refresh</button>
+          </div>
+          <div class="row" style="margin-top: 20px;">
+            <div style="flex: 1; min-width: 300px; background: var(--surface2); padding: 16px; border-radius: 8px;">
+              <h4 style="margin-bottom: 12px; font-weight: 500;">Hiring Funnel</h4>
+              <canvas id="funnelChart"></canvas>
+            </div>
+            <div style="flex: 1; min-width: 300px; background: var(--surface2); padding: 16px; border-radius: 8px;">
+              <h4 style="margin-bottom: 12px; font-weight: 500;">Candidate Sources</h4>
+              <canvas id="sourceChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📈 Weekly Recruitment Metrics</div>
+          </div>
+          <div class="chart-container" style="position:relative;height:300px;width:100%">
+            <canvas id="pipelineChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <script src="/static/app.js"></script>
+</body>
+
+</html>

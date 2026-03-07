@@ -1,0 +1,11 @@
+Welcome to [Company Name]!
+
+This is a placeholder for your company handbook. Replace this file with your actual company handbook PDF or document.
+
+Key sections to include:
+- Company Mission & Values
+- Code of Conduct
+- IT Security Policy
+- Benefits Overview
+- Leave Policy Details
+- Expense Reimbursement Process
