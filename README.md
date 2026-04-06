@@ -1,4 +1,4 @@
-# HR AI Agent - Unified System
+# HR AI Agent -- Unified System
 
 A comprehensive HR automation system with integrated Google Calendar scheduling capabilities.
 Team - Ozark
